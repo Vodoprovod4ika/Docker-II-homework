@@ -4,7 +4,7 @@
 
   vars:
     image_name: "vodoprovod4ika/ansible-homework"
-    image_tag: "0.01"
+    image_tag: "0.02"
     listen_port: "5001"
 
   tasks:

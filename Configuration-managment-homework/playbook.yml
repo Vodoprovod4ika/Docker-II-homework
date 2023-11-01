@@ -26,13 +26,18 @@
         state: present
 
     - name: Build docker image
-      shell: "docker build -t {{ image_name }}:{{ image_tag }} ."
-
-    - name: Docker tag image
-      shell: "docker tag {{ image_name }}:{{ image_tag }} {{ image_name }}:{{ image_tag }}"
+      #shell: "docker build -t {{ image_name }}:{{ image_tag }} ."
+      docker_image:
+        name: "{{ image_name }}"
+        build:
+          path: ./
+          args:
+            listen_port: "{{ listen_port }}"
+        tag: "{{ image_tag }}"
+        push: true
+        source: build
     
-    - name: Push docker image
-      shell: "docker push {{ image_name }}:{{image_tag}}"
-
-    - name: Run docker image
-      shell: "docker run --name {{ image_name }} -p {{ listen_port }}:{{ listen_port }} {{ image_name }}:{{image_tag}}"
+    - name: Pull image from repo
+      docker_image:
+        name: "{{ image_name }}:{{ image_tag }}"
+        source: pull

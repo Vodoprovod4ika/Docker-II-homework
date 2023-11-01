@@ -1,0 +1,31 @@
+- hosts: localhost
+  gather_facts: no
+  become: no
+
+  vars:
+    image_name: ""
+    image_tag: ""
+    listen_port: "5001"
+
+  tasks:
+    - name: Create code dir
+      file:
+        dest: code/
+        state: directory
+
+    - name: Get latest app code from github
+      git:
+        repo: https://github.com/vutoff/devops-programme
+        version: main
+        dest: code/
+
+    - name: Install Python requirements
+      pip:
+        chdir: code/
+        requirements: requirements.txt
+        state: present
+
+    - name: Start flask app
+      shell: "flask run -h {{ app_host }} -p {{ app_port }} &"
+      args:
+        chdir: code/app

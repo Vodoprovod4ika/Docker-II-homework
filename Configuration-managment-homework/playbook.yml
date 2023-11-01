@@ -37,7 +37,11 @@
         push: true
         source: build
     
-    - name: Pull image from repo
-      docker_image:
-        name: "{{ image_name }}:{{ image_tag }}"
-        source: pull
+    - name: Docker run image
+      docker_container:
+        name: config-homework
+        image: "{{image_name}}:{{ image_tag }}"
+        state: present
+        recreate: true
+        exposed_ports:
+          - "{{ listen_port }}"

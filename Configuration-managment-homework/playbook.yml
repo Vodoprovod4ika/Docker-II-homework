@@ -1,0 +1,47 @@
+- hosts: localhost
+  gather_facts: no
+  become: no
+
+  vars:
+    image_name: "vodoprovod4ika/ansible-homework"
+    image_tag: "0.02"
+    listen_port: "5001"
+
+  tasks:
+    - name: Create code dir
+      file:
+        dest: code/
+        state: directory
+
+    - name: Get latest app code from github
+      git:
+        repo: https://github.com/vutoff/devops-programme
+        version: main
+        dest: code/
+
+    - name: Install Python requirements
+      pip:
+        chdir: code/
+        requirements: requirements.txt
+        state: present
+
+    - name: Build docker image
+      #shell: "docker build -t {{ image_name }}:{{ image_tag }} ."
+      docker_image:
+        name: "{{ image_name }}"
+        build:
+          path: ./
+          args:
+            listen_port: "{{ listen_port }}"
+        tag: "{{ image_tag }}"
+        push: true
+        source: build
+    
+    - name: Docker run image
+      docker_container:
+        name: config-homework
+        image: "{{image_name}}:{{ image_tag }}"
+        state: present
+        recreate: true
+        exposed_ports:
+          - "{{ listen_port }}"

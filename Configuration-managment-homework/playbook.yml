@@ -3,10 +3,9 @@
   become: no
 
   vars:
-    image_name: "ansible-homework"
+    image_name: "vodoprovod4ika/ansible-homework"
     image_tag: "0.01"
     listen_port: "5001"
-    docker_username: "vodoprovod4ika"
 
   tasks:
     - name: Create code dir
@@ -30,10 +29,10 @@
       shell: "docker build -t {{ image_name }}:{{ image_tag }} ."
 
     - name: Docker tag image
-      shell: "docker tag {{ image_name }}:{{ image_tag }} {{ docker_username }}/{{ image_name }}:{{ image_tag }}"
+      shell: "docker tag {{ image_name }}:{{ image_tag }} {{ image_name }}:{{ image_tag }}"
     
     - name: Push docker image
-      shell: "docker push {{ docker_username }}/{{ image_name }}:{{image_tag}}"
+      shell: "docker push {{ image_name }}:{{image_tag}}"
 
     - name: Run docker image
-      shell: "docker run --name {{ image_name }} -p {{ listen_port }}:{{ listen_port }} {{ docker_username }}/{{ image_name }}:{{image_tag}}"
+      shell: "docker run --name {{ image_name }} -p {{ listen_port }}:{{ listen_port }} {{ image_name }}:{{image_tag}}"

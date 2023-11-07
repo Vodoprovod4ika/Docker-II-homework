@@ -1,0 +1,43 @@
+- name: Play for secrets management
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars_prompt:
+    - name: vault_secret
+      prompt: "Enter the vault token"
+      private: true
+
+  tasks:
+    - name: Get repo for the homework
+      ansible.builtin.git:
+        repo: https://github.com/vutoff/vault-docker-demo
+        dest: code/
+        version: "main"
+
+    - name: Run docker compose up to create new DB and Vault server
+      ansible.builtin.command: docker-compose up -d
+      changed_when: false
+      args:
+        chdir: code/
+
+    - name: Wait for vault server start
+      ansible.builtin.wait_for:
+        port: "8200"
+
+    - name: First time auth in the vault
+      ansible.builtin.expect:
+        command: vault login
+        responses:
+          (.*)Token (.*): "{{ vault_secret }}"
+
+    - name: Get dynamic secret for DB
+      ansible.builtin.command: vault read database/creds/my-role
+      register: token
+      changed_when: false
+      retries: 5
+      delay: 5
+      until: token.stderr != 'No value found at database/creds/my-role'
+
+    - name: Print the token
+      ansible.builtin.debug:
+        var: token.stdout_lines

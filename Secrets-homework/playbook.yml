@@ -1,0 +1,26 @@
+- name: Play for secrets management
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Get repo for the homework
+      ansible.builtin.git:
+        repo: https://github.com/vutoff/vault-docker-demo
+        dest: code/
+        version: "main"
+
+    - name: Run docker compose up to create new DB and Vault server
+      ansible.builtin.command: docker-compose up -d
+      changed_when: false
+      args:
+        chdir: code/
+
+    - name: Get dynamic secret for DB
+      ansible.builtin.command: vault read database/creds/my-role
+      register: token
+      changed_when: false
+
+    - name: Print the token
+      ansible.builtin.debug:
+        var: token.stdout_lines

@@ -13,7 +13,7 @@
     - name: Create code dir
       ansible.builtin.file:
         dest: code/
-        mode: "0600"
+        mode: "0766"
         state: directory
 
     - name: Get latest app code from github
@@ -43,7 +43,7 @@
       community.docker.docker_container:
         name: config-homework
         image: "{{ image_name }}:{{ image_tag }}"
-        state: present
+        state: started
         recreate: true
-        exposed_ports:
-          - "{{ listen_port }}"
+        ports:
+          - "{{ listen_port }}:5000"

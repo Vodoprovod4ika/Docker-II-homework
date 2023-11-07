@@ -1,6 +1,8 @@
-- hosts: localhost
-  gather_facts: no
-  become: no
+---
+- name: Play for creating docker image
+  hosts: localhost
+  gather_facts: false
+  become: false
 
   vars:
     image_name: "vodoprovod4ika/ansible-homework"
@@ -9,25 +11,25 @@
 
   tasks:
     - name: Create code dir
-      file:
+      ansible.builtin.file:
         dest: code/
+        mode: "0600"
         state: directory
 
     - name: Get latest app code from github
-      git:
+      ansible.builtin.git:
         repo: https://github.com/vutoff/devops-programme
         version: main
         dest: code/
 
     - name: Install Python requirements
-      pip:
+      ansible.builtin.pip:
         chdir: code/
         requirements: requirements.txt
         state: present
 
     - name: Build docker image
-      #shell: "docker build -t {{ image_name }}:{{ image_tag }} ."
-      docker_image:
+      community.docker.docker_image:
         name: "{{ image_name }}"
         build:
           path: ./
@@ -36,11 +38,11 @@
         tag: "{{ image_tag }}"
         push: true
         source: build
-    
+
     - name: Docker run image
-      docker_container:
+      community.docker.docker_container:
         name: config-homework
-        image: "{{image_name}}:{{ image_tag }}"
+        image: "{{ image_name }}:{{ image_tag }}"
         state: present
         recreate: true
         exposed_ports:
